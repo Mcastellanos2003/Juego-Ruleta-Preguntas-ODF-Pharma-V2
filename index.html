@@ -254,18 +254,25 @@ startGame();
     }
 
     async function finishToSheet(premio){
-  // si no hubo sessionRow, igual intentamos (opcional), pero no bloquea
+
   try{
-    await apiPost({
-      action:"finish",
-      nombre: player.nombre,
-      telefono: player.telefono || "",
-      sessionRow: sessionRow || "",
-      correctas: correct,
-      paso_quiz: (correct >= 3),
-      premio: premio || ""
-    });
-  }catch(e){}
+
+    await fetch(ENDPOINT,{
+      method:"POST",
+      headers:{
+        "Content-Type":"text/plain;charset=utf-8"
+      },
+      body: JSON.stringify({
+        nombre: player.nombre,
+        telefono: player.telefono,
+        premio: premio
+      })
+    })
+
+  }catch(e){
+    console.log("No se pudo guardar resultado")
+  }
+
 }
 
     function endQuiz(){
