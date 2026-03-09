@@ -28,7 +28,7 @@
     .win{color:var(--ok);font-weight:900;}
     .lose{color:var(--bad);font-weight:900;}
     .wheelBox{display:flex;flex-direction:column;gap:12px;align-items:center;}
-    .pointer{width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-bottom:22px solid var(--warn);filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));margin-bottom:-10px;}
+    .pointer{width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:22px solid var(--warn);filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));margin-bottom:-10px;}
     canvas{width:100%;max-width:420px;aspect-ratio:1/1;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.12);border-radius:18px;}
     .overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:18px;}
     .modal{width:min(520px,100%);border-radius:18px;padding:18px;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 60px rgba(0,0,0,.4);}
@@ -332,11 +332,18 @@
 
     function normalizeAngle(a){ const twoPi=Math.PI*2; return ((a%twoPi)+twoPi)%twoPi; }
     function getPrizeAtPointer(finalAngle){
-      const n=PRIZES.length, slice=(Math.PI*2)/n;
-      const a = normalizeAngle((Math.PI*2) - finalAngle + (Math.PI/2));
-      const index = Math.floor(a / slice) % n;
-      return PRIZES[index];
-    }
+  const n = PRIZES.length;
+  const slice = (Math.PI * 2) / n;
+
+  // La flecha está arriba (12 en punto), así que usamos -PI/2
+  const pointerAngle = -Math.PI / 2;
+
+  // Calculamos qué sector queda exactamente bajo la flecha
+  const a = normalizeAngle(pointerAngle - finalAngle);
+  const index = Math.floor(a / slice) % n;
+
+  return PRIZES[index];
+}
 
     function resetWheel(){
       angle=0; spinning=false; spinUsed=false;
