@@ -181,27 +181,11 @@
       overlayStatus.style.display = "block";
       overlayStatus.textContent = "Verificando teléfono...";
 
-      try{
-  // Intentamos registrar, pero si falla igual dejamos jugar
-  const r = await apiPost({ action:"start", nombre, telefono });
-
-  // Ya NO bloqueamos por duplicado ni por teléfono
-  if (r && r.ok) {
-    sessionRow = r.sessionRow;
-  } else {
-    sessionRow = null; // no pasa nada
-  }
-
-} catch (err) {
-  // Si no conecta, NO bloqueamos el juego
-  sessionRow = null;
-}
-
-// SIEMPRE dejaremos jugar
-player = { nombre, telefono };
-overlay.style.display = "none";
-btnStart.disabled = false;
-startGame();
+      player = { nombre, telefono };
+      sessionRow = null;
+      overlay.style.display = "none";
+      btnStart.disabled = false;
+      startGame();
     });
 
     function startGame(){
