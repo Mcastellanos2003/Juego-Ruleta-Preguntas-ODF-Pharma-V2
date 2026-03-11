@@ -81,15 +81,28 @@
       <h2>Antes de jugar</h2>
       <p style="margin:0 0 12px;color:var(--muted);font-weight:700;">Para evitar repetir, el teléfono es obligatorio.</p>
       <div class="grid2">
-        <div class="field">
-          <label>Nombre *</label>
-          <input id="inpName" placeholder="Ej: María Pérez" maxlength="60" />
-        </div>
-        <div class="field">
-          <label>Teléfono * (solo números)</label>
-          <input id="inpPhone" placeholder="Ej: 0991234567" inputmode="numeric" maxlength="20" />
-        </div>
-      </div>
+  <div class="field">
+    <label>Nombre *</label>
+    <input id="inpName" placeholder="Ej: María Pérez" maxlength="60" />
+  </div>
+  <div class="field">
+    <label>Teléfono</label>
+    <input id="inpPhone" placeholder="Ej: 0991234567" maxlength="20" />
+  </div>
+  <div class="field">
+    <label>Ciudad *</label>
+    <input id="inpCity" placeholder="Ej: Quito" maxlength="50" />
+  </div>
+  <div class="field">
+    <label>Nombre de Farmacia *</label>
+    <input id="inpPharmacy" placeholder="Ej: Farmacia San José" maxlength="80" />
+  </div>
+</div>
+
+<div class="field" style="margin-top:10px;">
+  <label>Dirección de Farmacia *</label>
+  <input id="inpAddress" placeholder="Ej: Av. Amazonas y Colón" maxlength="120" />
+</div>
       <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end;flex-wrap:wrap;">
         <button class="btn" id="btnStart" type="button">Empezar</button>
       </div>
@@ -172,9 +185,20 @@ function loadPrizeImages() {
     const btnSpin = $("btnSpin"), wheelStatus = $("wheelStatus");
 
     const overlay = $("overlay"), overlayStatus = $("overlayStatus");
-    const inpName = $("inpName"), inpPhone = $("inpPhone"), btnStart = $("btnStart");
+    const inpName = $("inpName"),
+      inpPhone = $("inpPhone"),
+      inpCity = $("inpCity"),
+      inpPharmacy = $("inpPharmacy"),
+      inpAddress = $("inpAddress"),
+      btnStart = $("btnStart");
 
-    let player = { nombre:"", telefono:"" };
+    let player = {
+  nombre: "",
+  telefono: "",
+  ciudad: "",
+  farmacia: "",
+  direccion: ""
+};
     let sessionRow = null;
 
     let round = [], idx = 0, correct = 0, locked = false, selectedIndex = null, passedQuiz = false;
@@ -219,23 +243,23 @@ function loadPrizeImages() {
     }
 
     btnStart.addEventListener("click", async () => {
-      if (btnStart.disabled) return;
-      const nombre = (inpName.value || "").trim();
-      const telefono = (inpPhone.value || "").trim(); // puede ser vacío
+  const nombre = (inpName.value || "").trim();
+  const telefono = (inpPhone.value || "").trim();
+  const ciudad = (inpCity.value || "").trim();
+  const farmacia = (inpPharmacy.value || "").trim();
+  const direccion = (inpAddress.value || "").trim();
 
-      if (!nombre) return showOverlayError("Escribe tu nombre.");
-      // teléfono NO obligatorio
+  if (!nombre) return showOverlayError("Escribe tu nombre.");
+  if (!ciudad) return showOverlayError("Escribe la ciudad.");
+  if (!farmacia) return showOverlayError("Escribe el nombre de la farmacia.");
+  if (!direccion) return showOverlayError("Escribe la dirección de la farmacia.");
 
-      btnStart.disabled = true;
-      overlayStatus.style.display = "block";
-      overlayStatus.textContent = "Verificando teléfono...";
-
-      player = { nombre, telefono };
-      sessionRow = null;
-      overlay.style.display = "none";
-      btnStart.disabled = false;
-      startGame();
-    });
+  player = { nombre, telefono, ciudad, farmacia, direccion };
+  sessionRow = null;
+  overlay.style.display = "none";
+  btnStart.disabled = false;
+  startGame();
+});
 
     function startGame(){
       round = pickRandomUnique(QUESTION_BANK, 5);
@@ -287,25 +311,25 @@ function loadPrizeImages() {
     }
 
     async function finishToSheet(premio){
-
   try{
-
     await fetch(ENDPOINT,{
       method:"POST",
       headers:{
         "Content-Type":"text/plain;charset=utf-8"
       },
       body: JSON.stringify({
+        action: "finish",
         nombre: player.nombre,
         telefono: player.telefono,
+        ciudad: player.ciudad,
+        farmacia: player.farmacia,
+        direccion: player.direccion,
         premio: premio
       })
-    })
-
+    });
   }catch(e){
-    console.log("No se pudo guardar resultado")
+    console.log("No se pudo guardar resultado");
   }
-
 }
 
     function endQuiz(){
