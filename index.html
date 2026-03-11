@@ -254,7 +254,14 @@ function loadPrizeImages() {
   if (!farmacia) return showOverlayError("Escribe el nombre de la farmacia.");
   if (!direccion) return showOverlayError("Escribe la dirección de la farmacia.");
 
-  player = { nombre, telefono, ciudad, farmacia, direccion };
+  player = {
+    nombre,
+    telefono,
+    ciudad,
+    farmacia,
+    direccion
+  };
+
   sessionRow = null;
   overlay.style.display = "none";
   btnStart.disabled = false;
