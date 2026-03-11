@@ -112,7 +112,7 @@
 
   <script>
     // ✅ TU ENDPOINT (Apps Script /exec)
-    const ENDPOINT = "https://script.google.com/macros/s/AKfycbzL-YGJ7115tXzPQc3sEdJb1u5BcTiw0iH4VvR06hytAv2utPjd5jJKfVm5UZzt1t29/exec";
+    const ENDPOINT = "https://script.google.com/macros/s/AKfycbytotFNZPyxiWM4lbgYm328DxvYjZkGAJ_IseT8AWxSotV3fBf8QQW7eKso1FI8uqA1pw/exec";
 
     const QUESTION_BANK = [
       { q:"¿Cúal es la presentación de TADANERFI 20 mg?", options:["En cápsulas blandas","En comprimidos recubiertos","En película oral ODF","En jarabe"], answer:2 },
@@ -259,14 +259,7 @@ function loadPrizeImages() {
   if (!farmacia) return showOverlayError("Escribe el nombre de la farmacia.");
   if (!direccion) return showOverlayError("Escribe la dirección de la farmacia.");
 
-  player = {
-    nombre,
-    telefono,
-    ciudad,
-    farmacia,
-    direccion
-  };
-
+  player = { nombre, telefono, ciudad, farmacia, direccion };
   sessionRow = null;
   overlay.style.display = "none";
   btnStart.disabled = false;
@@ -330,7 +323,6 @@ function loadPrizeImages() {
         "Content-Type":"text/plain;charset=utf-8"
       },
       body: JSON.stringify({
-        action: "finish",
         nombre: player.nombre,
         telefono: player.telefono,
         ciudad: player.ciudad,
