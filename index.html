@@ -42,7 +42,10 @@
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>Juego: 5 preguntas + Ruleta</h1>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+  <img src="logo.png" style="height:50px;">
+  <h1>Juego: 5 preguntas + Ruleta</h1>
+</div>
       <p>Responde <b>mínimo 3 correctas</b> de 5 para desbloquear la ruleta. <b>1 participación por teléfono</b>.</p>
 
       <div class="row">
@@ -96,7 +99,7 @@
 
   <script>
     // ✅ TU ENDPOINT (Apps Script /exec)
-    const ENDPOINT = "https://script.google.com/macros/s/AKfycbzPyP59MaGMHbbNnW4Nm2j9aIjix9UPjGMB7X8tl-gBm0LbSWbrTW7kdP2dCELJyWjL/exec";
+    const ENDPOINT = "https://script.google.com/macros/s/AKfycbwLUfNuMN0jcivtWHwWdVp0RxG-RVYGvMGpodOScOm_0jdmA9P6UKhJxppWQT84upsB/exec";
 
     const QUESTION_BANK = [
       { q:"¿Cúal es la presentación de TADANERFI 20 mg?", options:["En cápsulas blandas","En comprimidos recubiertos","En película oral ODF","En jarabe"], answer:2 },
@@ -113,7 +116,53 @@
       { q:"¿Cuál es la duración aproximada del efecto de TADANERFI 20 mg en lámina ODF?", options:["6 horas","12 horas","24 horas","Hasta 36 horas"], answer:3 },
     ];
 
-    const PRIZES = ["Esfero Blanco","Esfero Negro","Billetera","Combo KFC","Siga participando"];
+    const PRIZES = [
+{label:"Esfero Blanco", img:"esfero-blanco.png"},
+{label:"Esfero Negro", img:"esfero-negro.png"},
+{label:"Billetera", img:"billetera.png"},
+{label:"Combo KFC", img:"kfc.png"},
+{label:"Siga participando", img:"siga.png"}
+];
+
+    const prizeImages = {};
+
+function loadPrizeImages() {
+  return Promise.all(
+    PRIZES.map(prize => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          prizeImages[prize.label] = img;
+          resolve();
+        };
+        img.onerror = () => {
+          console.warn("No se pudo cargar imagen:", prize.img);
+          resolve();
+        };
+        img.src = prize.img;
+      });
+    })
+  );
+}
+    function wrapText(text, maxCharsPerLine) {
+  const words = text.split(" ");
+  const lines = [];
+  let currentLine = "";
+
+  for (const word of words) {
+    const testLine = currentLine ? currentLine + " " + word : word;
+    if (testLine.length <= maxCharsPerLine) {
+      currentLine = testLine;
+    } else {
+      if (currentLine) lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+
+  if (currentLine) lines.push(currentLine);
+  return lines;
+}
+    
 
     const $ = (id) => document.getElementById(id);
 
@@ -294,41 +343,90 @@
     btnRestart.addEventListener("click", () => startGame());
 
     function drawWheel(){
-      const W = wheelCanvas.width, H = wheelCanvas.height;
-      const cx = W/2, cy = H/2;
-      const r = Math.min(W,H)*0.38;
+  const W = wheelCanvas.width, H = wheelCanvas.height;
+  const cx = W/2, cy = H/2;
+  const r = Math.min(W,H)*0.38;
 
-      ctx.clearRect(0,0,W,H);
-      ctx.beginPath(); ctx.arc(cx,cy,r+30,0,Math.PI*2);
-      ctx.fillStyle="rgba(255,255,255,0.04)"; ctx.fill();
+  ctx.clearRect(0,0,W,H);
 
-      const n = PRIZES.length, slice = (Math.PI*2)/n;
+  // aro exterior
+  ctx.beginPath();
+  ctx.arc(cx,cy,r+30,0,Math.PI*2);
+  ctx.fillStyle="rgba(255,255,255,0.04)";
+  ctx.fill();
 
-      for (let i=0;i<n;i++){
-        const start = angle + i*slice, end = start + slice;
-        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,start,end); ctx.closePath();
-        ctx.fillStyle = (i%2===0) ? "rgba(59,130,246,0.35)" : "rgba(255,255,255,0.18)";
-        ctx.fill();
-        ctx.strokeStyle="rgba(255,255,255,0.14)"; ctx.lineWidth=2; ctx.stroke();
+  const n = PRIZES.length;
+  const slice = (Math.PI*2)/n;
 
-        ctx.save();
-        ctx.translate(cx,cy);
-        ctx.rotate(start + slice/2);
-        ctx.textAlign="right";
-        ctx.fillStyle="rgba(233,238,252,0.95)";
-        ctx.font="900 34px system-ui";
-        ctx.fillText(PRIZES[i], r-18, 12);
-        ctx.restore();
-      }
+  for (let i=0;i<n;i++){
+    const start = angle + i*slice;
+    const end = start + slice;
+    const prize = PRIZES[i];
+    const mid = start + slice/2;
 
-      ctx.beginPath(); ctx.arc(cx,cy,56,0,Math.PI*2);
-      ctx.fillStyle="rgba(0,0,0,0.25)"; ctx.fill();
-      ctx.strokeStyle="rgba(255,255,255,0.14)"; ctx.stroke();
-      ctx.fillStyle="rgba(233,238,252,0.95)";
-      ctx.font="900 26px system-ui";
-      ctx.textAlign="center";
-      ctx.fillText("GIRA", cx, cy+9);
+    // sector
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,start,end);
+    ctx.closePath();
+    ctx.fillStyle = (i%2===0) ? "rgba(59,130,246,0.35)" : "rgba(255,255,255,0.18)";
+    ctx.fill();
+    ctx.strokeStyle="rgba(255,255,255,0.14)";
+    ctx.lineWidth=2;
+    ctx.stroke();
+
+    // rotación común para texto + imagen
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(mid);
+
+    // TEXTO
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "rgba(233,238,252,0.95)";
+    ctx.font = "900 22px system-ui";
+
+    // posición del texto
+    const textRadius = r * 0.67;
+    ctx.save();
+    ctx.translate(Math.cos(0) * textRadius, Math.sin(0) * textRadius);
+    ctx.rotate(Math.PI / 2); // misma orientación para todos dentro del sector
+
+    const lines = wrapText(prize.label, 12);
+    lines.forEach((line, idx) => {
+      ctx.fillText(line, 0, idx * 26 - ((lines.length - 1) * 13));
+    });
+    ctx.restore();
+
+    // IMAGEN debajo del texto
+    const img = prizeImages[prize.label];
+    if (img) {
+      const imgRadius = r * 0.48;
+      const imgSize = 62;
+
+      ctx.save();
+      ctx.translate(Math.cos(0) * imgRadius, Math.sin(0) * imgRadius);
+      ctx.rotate(Math.PI / 2); // misma orientación que el texto
+      ctx.drawImage(img, -imgSize/2, -imgSize/2, imgSize, imgSize);
+      ctx.restore();
     }
+
+    ctx.restore();
+  }
+
+  // centro
+  ctx.beginPath();
+  ctx.arc(cx,cy,56,0,Math.PI*2);
+  ctx.fillStyle="rgba(0,0,0,0.25)";
+  ctx.fill();
+  ctx.strokeStyle="rgba(255,255,255,0.14)";
+  ctx.stroke();
+  ctx.fillStyle="rgba(233,238,252,0.95)";
+  ctx.font="900 26px system-ui";
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  ctx.fillText("GIRA", cx, cy+2);
+}
 
     function normalizeAngle(a){ const twoPi=Math.PI*2; return ((a%twoPi)+twoPi)%twoPi; }
     function getPrizeAtPointer(finalAngle){
@@ -342,7 +440,7 @@
   const a = normalizeAngle(pointerAngle - finalAngle);
   const index = Math.floor(a / slice) % n;
 
-  return PRIZES[index];
+  return PRIZES[index].label;
 }
 
     function resetWheel(){
@@ -387,8 +485,10 @@
       requestAnimationFrame(frame);
     });
 
-    drawWheel();
-    openOverlay();
+    loadPrizeImages().then(() => {
+  drawWheel();
+  openOverlay();
+});
   </script>
 </body>
 </html>
