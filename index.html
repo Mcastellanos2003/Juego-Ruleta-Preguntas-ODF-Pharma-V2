@@ -232,11 +232,16 @@ function loadPrizeImages() {
 }
 
     function openOverlay(){
-      overlayStatus.style.display = "none";
-      inpName.value = "";
-      inpPhone.value = "";
-      overlay.style.display = "flex";
-    }
+  overlayStatus.style.display = "none";
+
+  inpName.value = "";
+  inpPhone.value = "";
+  inpCity.value = "";
+  inpPharmacy.value = "";
+  inpAddress.value = "";
+
+  overlay.style.display = "flex";
+}
     function showOverlayError(msg){
       overlayStatus.style.display = "block";
       overlayStatus.textContent = msg;
